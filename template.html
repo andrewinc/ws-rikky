@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <title>PAGE</title>
     <style>
+        #token_list li span {
+            border-bottom: blue dashed 1px;
+            cursor: pointer;
+        }
+        #token_list li.focus {
+            font-weight: bold;
+        }
         a {
             color: #aaaaff;
             font-weight: bold;
@@ -12,17 +19,16 @@
             color: black;
         }
     </style>
-    <script>%%WS_URL%%</script>
+    <script>%%SCRIPT%%</script>
 </head>
 <body>
   <h1>My token</h1>
-  <ul>
-      %%tokens%%
+  <ul id="token_list">
   </ul>
   <hr/>
   <h1>Message</h1>
   <form>
-      <div><label>ID:<br/><select id="msg_id" name="id">%%options%%</select></label></div>
+      <div><label>To token:<br/><select id="to_token"></select></label></div>
       <div><label>TYPE:<br/><input id="msg_type" name="type" type="text" placeholder="type" value="t1"/></label></div>
       <div><label>TEXT:<br/><input id="msg_text" name="text" type="text" placeholder="text" value="Hi"/></label></div>
       <div><label>LINK:<br/><input id="msg_link" name="link" type="text" placeholder="link" value="https://ya.ru"/></label></div>
@@ -32,19 +38,56 @@
   <h1>Inbox</h1>
   <div id="inbox"></div>
   <script>
+      let ws = null // WS соединение если установлено
+      let _TOKEN = null //текущий токен
+
+      const token_list = document.getElementById('token_list')
       const msg_send = document.getElementById('msg_send')
-      const msg_id = document.getElementById('msg_id')
+      const to_token = document.getElementById('to_token')
       const msg_type = document.getElementById('msg_type')
       const msg_text = document.getElementById('msg_text')
       const msg_link = document.getElementById('msg_link')
       const inbox = document.getElementById('inbox')
 
+      function setToken(token) {
+          _TOKEN = token
+          try{ws.send(JSON.stringify({cmd:'setToken', data:token}))}catch(e){}
+      }
+
+
+      // наполнить список токенов и select формы токенами из массива TOKENS
+      to_token.innerHTML = TOKENS.map(token=>`<option>${token}</option>`).join('')
+      token_list.innerHTML = TOKENS.map(token=>`<li><span data-value="${token}">TOKEN: ${token}</span></li>`).join('')
+      token_list.addEventListener('click', event=>{
+          let LI = event.target.closest('li'), SPAN = event.target.closest('span')
+          if (!LI || !SPAN) return  // кликнули вне li>span
+          let new_token = SPAN.getAttribute('data-value')
+          if (!new_token) return // не определён токен
+
+          token_list.querySelectorAll('li').forEach(li=>{if (li==LI) li.classList.add('focus'); else li.classList.remove('focus')})
+          setToken(new_token)
+      })
+
+      msg_send.addEventListener('click', event=>{
+          const body = JSON.stringify({
+              to: to_token.value,
+              type: msg_type.value,
+              text: msg_text.value,
+              link: msg_link.value,
+          })
+          fetch('/api.php', {method:'POST', body})
+      })
+
+
+
+
       function Connect(url) {
-          var ws = new WebSocket(url)
+          ws = new WebSocket(url)
 
           ws.onopen = () => {//sock.send('hey')
               msg_send.disabled = false
               ws.send(JSON.stringify({client_say:'I am conected', d: new Date().toLocaleTimeString()}))
+              if (_TOKEN) setToken(_TOKEN)
           }
 
           ws.onclose = event => {
@@ -70,16 +113,7 @@
           }
       }
 
-      msg_send.addEventListener('click', event=>{
-          const body = JSON.stringify({
-              id: Number(msg_id.value),
-              type: msg_type.value,
-              text: msg_text.value,
-              link: msg_link.value,
-          })
-          fetch('/api.php', {method:'POST', body})
-          //fetch('http://ws-riky:3210', {method:'POST', body})
-      })
+
       Connect(WS_URL)
 
   </script>

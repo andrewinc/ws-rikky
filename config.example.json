@@ -1,0 +1,21 @@
+{
+  "DB": {
+    "host": "localhost",
+    "user": "root",
+    "password": "root",
+    "database": "ws_rikky"
+  },
+  "WS": {
+    "ssl_use": false,
+    "ssl": {
+      "key": "../ssl-cert/privkey.pem",
+      "cert": "../ssl-cert/fullchain.pem"
+    },
+    "host": "ws-rikky",
+    "port": 1234
+  },
+  "BACKEND": {
+    "host": "ws-rikky",
+    "port": 3210
+  }
+}

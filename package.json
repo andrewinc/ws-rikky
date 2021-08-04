@@ -1,0 +1,12 @@
+{
+  "name": "ws-rikky",
+  "version": "1.0.0",
+  "description": "WebSocket demo",
+  "main": "index.js",
+  "author": "AndrewInc",
+  "license": "MIT",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "ws": "^7.4.5"
+  }
+}

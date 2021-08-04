@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 6.0.7.3 (Linux)"/>
+	<meta name="created" content="2021-05-05T01:04:14.936248272"/>
+	<meta name="changed" content="2021-05-05T01:45:15.678701240"/>
+	<style type="text/css">
+		@page { margin: 2cm }
+		p { margin-bottom: 0.25cm; line-height: 115% }
+		a:link { so-language: zxx }
+	</style>
+</head>
+<body lang="ru-RU" dir="ltr">
+<p style="margin-bottom: 0cm; line-height: 100%">Работающая
+версия <a href="https://test.jwork.ru/">https://test.jwork.ru/</a>
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">дамп базы
+<a href="https://test.jwork.ru/ws_rikky.sql">https://test.jwork.ru/ws_rikky.sql</a>
+(4 токена и 4 ID им соответствующие)</p>
+<p style="margin-bottom: 0cm; line-height: 100%">на основе
+настроек в config`е и подключения к этой
+БД php строит страницу</p>
+<p style="margin-bottom: 0cm; line-height: 100%">В разделе
+MyToken выбирается токен с которым идёт
+подключение по WebSocket. Если не выбрано
+то за отсуствием токена эта страница
+не будет получать уведомления.</p>
+<p style="margin-bottom: 0cm; line-height: 100%">В разделе
+Message созадётся сообщение для отправки
+одному из ID</p>
+<p style="margin-bottom: 0cm; line-height: 100%">из конфига
+берётся хост и порт nodejs демона который
+реализует общение по WebSocket в данном
+случае test.jwork.ru:1234. По этому адресу
+страница пытается соединиться и в случае
+неудачи повторяет попытки каждые 5 сек.</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Когда удалось
+— с кнопки отправки формы снимается
+disable и можно отправлять запрос.</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">По условиям
+задачи данные отправляются на сервер
+через AJAX (в данном случае в POST-запросе
+летит JSON c данными из формы), а ответ
+прилетает через WebSocket и только тому кто
+указан адресатом. Потому AJAX-запрос
+принимает PHP-скрипт api.php. Он транслирует
+этот JSON на node.js -демон который кроме
+webSocket-сервера реализует и HTTP-сервер
+(host и порт в конфиге: ветка BACKEND). 
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Node.js-демон
+получив через HTTP -запрос, ищет среди
+WebSocket-клиентов адресата (адресатов) и
+отправляет ему (им) это же сообщение.</p>
+<p style="margin-bottom: 0cm; line-height: 100%">На странице
+оно появляется в разделе inbox</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Осталось
+только добавить что node.js при каждом
+коннекте по переданному токену присваивает
+соединению ID-шник который берёт из БД.</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Если сайт
+работает через HTTPS то надо указать в
+конфиге ssl_use: true и в соответств. разделе
+key и cert иначе политика безопасности
+браузера не даст соединится к незащищённому
+ws-соединению, а так и ссылка для коннекта
+WS формируется правильная. Несмотря на
+наличие HTTPs — соединение api.php c node.js
+демоном всё равно идёт через HTTP (т.&nbsp;к.
+это канал внутреннего общения он снаружи
+сервера может быть не виден)</p>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Можно
+углубляться в детали но поверхностно
+как-то так.</p>
+<p style="margin-bottom: 0cm; line-height: 100%">Старался
+уйти от фреймворков чтобы показать
+«голый» пример.</p>
+</body>
+</html>
